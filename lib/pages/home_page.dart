@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../screens/voucher_screen.dart';
+import '../screens/category_screen.dart';
 import '../screens/home_screen.dart';
+import '../screens/cart_screen.dart';
 import '../screens/profile_screen.dart';
 
 class HomePage extends StatefulWidget {
@@ -18,14 +19,15 @@ class _HomePageState extends State<HomePage>{
   int curentIndex = 0;
   List screen = [
     HomeScreen(),
-    VoucherScreen(),
+    CategoryScreen(),
+    CartScreen(),
     ProfileScreen(),
   ];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('cellphones'),
+        title: Image.asset('assets/logo/branch.jpg', width: 200, height: 200),
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(
             bottom: Radius.circular(15), // 👈 bo cong cạnh dưới
@@ -37,8 +39,8 @@ class _HomePageState extends State<HomePage>{
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                Color(0xFF1976D2), // xanh đậm
-                Color(0xFF42A5F5), // xanh nhạt vừa
+                Colors.redAccent, // xanh đậm
+                Colors.redAccent, // xanh nhạt vừa
               ],
             ),
           ),
@@ -84,23 +86,23 @@ class _HomePageState extends State<HomePage>{
             curentIndex = index;
           });
         },
-        selectedItemColor: Colors.blue,
+        selectedItemColor: Colors.redAccent,
         items: [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
-            label: 'Home',
+            label: 'trang chủ',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.card_giftcard),
-            label: 'Voucher',
+            label: 'danh mục',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.shopping_cart),
-            label: 'Cart',
+            label: 'giỏ hàng',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
-            label: 'Profile',
+            label: 'tài khoản',
           ),
         ],
       ),

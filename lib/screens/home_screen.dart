@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../model/my_product.dart';
 import '../model/product.dart';
-import '../services/api_service.dart';
+import '../services/api_product_service.dart';
 import '../widgets/product_card.dart';
 
 class HomeScreen extends StatefulWidget{
@@ -19,13 +19,13 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _phonesFuture = ApiService.fetchProducts("phone", 0, 20);
-    _laptopsFuture = ApiService.fetchProducts("laptop", 0, 20);
+    _phonesFuture = ApiProductService.fetchProducts("mobile", 1, 10);
+    _laptopsFuture = ApiProductService.fetchProducts("laptop", 1, 10);
   }
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(20.0),
+      padding: const EdgeInsets.all(10.0),
       child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -53,7 +53,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
             /// ✅ Đây là chỗ cần thêm ListPhone
             SizedBox(
-              height: 570,
+              height: 620,
               child: _BuildPhoneProduct(),
             ),
             const SizedBox(height: 10),
@@ -68,7 +68,7 @@ class _HomeScreenState extends State<HomeScreen> {
             /// ✅ Đây là chỗ cần thêm ListLaptop
             const SizedBox(height: 20),
             SizedBox(
-              height: 570,
+              height: 620,
               child: _BuildLaptopProduct(),
             ),
         
@@ -178,8 +178,8 @@ class _HomeScreenState extends State<HomeScreen> {
         return GridView.builder(
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2,
-            crossAxisSpacing: 10,
-            mainAxisSpacing: 10,
+            crossAxisSpacing: 0,
+            mainAxisSpacing: 0,
             childAspectRatio: (screenWidth / 2) / 140,
           ),
           scrollDirection: Axis.horizontal,
