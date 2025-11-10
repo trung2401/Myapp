@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '../model/my_product.dart';
+
 import '../model/product.dart';
 import '../services/api_product_service.dart';
+import '../widgets/brand_row_widget.dart';
 import '../widgets/product_card.dart';
 
 class HomeScreen extends StatefulWidget{
@@ -19,8 +20,17 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _phonesFuture = ApiProductService.fetchProducts("mobile", 1, 10);
-    _laptopsFuture = ApiProductService.fetchProducts("laptop", 1, 10);
+    _phonesFuture = ApiProductService.fetchProducts(
+      categorySlug: "mobile",
+      page: 1,
+      size: 100,
+    );
+
+    _laptopsFuture = ApiProductService.fetchProducts(
+      categorySlug: "laptop",
+      page: 1,
+      size: 100,
+    );
   }
   @override
   Widget build(BuildContext context) {
@@ -40,7 +50,8 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
         
         
-            // const SizedBox(height: 20),
+            const SizedBox(height: 10),
+            BrandRowWidget(categorySlug: "mobile"),
             // Row(
             //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             //   children: [
@@ -65,6 +76,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 color: Colors.black,
               ),
             ),
+            const SizedBox(height: 10),
+            BrandRowWidget(categorySlug: "laptop"),
             /// ✅ Đây là chỗ cần thêm ListLaptop
             const SizedBox(height: 20),
             SizedBox(

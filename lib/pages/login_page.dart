@@ -3,8 +3,13 @@ import 'package:myapp/pages/sign_up_page.dart';
 import '../model/login_response.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/login_api_service.dart';
+import 'home_page.dart';
+import 'forgot_password_page.dart';
+
 
 class LoginPage extends StatefulWidget {
+  final bool fromDetail;
+  const LoginPage({super.key, this.fromDetail = false});
   @override
   State<StatefulWidget> createState() => _LoginPageState();
 }
@@ -129,9 +134,9 @@ class _LoginPageState extends State<LoginPage> {
                         }
 
                         // 🔹 Kiểm tra có ít nhất 1 ký tự đặc biệt
-                        if (!RegExp(r'[!@#\$%^&*(),.?":{}|<>]').hasMatch(value)) {
-                          return 'Mật khẩu phải chứa ít nhất 1 ký tự đặc biệt';
-                        }
+                        // if (!RegExp(r'[!@#\$%^&*(),.?":{}|<>]').hasMatch(value)) {
+                        //   return 'Mật khẩu phải chứa ít nhất 1 ký tự đặc biệt';
+                        // }
                         return null;
                       },
                     ),
@@ -140,7 +145,10 @@ class _LoginPageState extends State<LoginPage> {
 
                     TextButton(
                         onPressed: () {
-                          // Điều hướng đến trang quên mật khẩu
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const ForgotPasswordPage()),
+                          );
                         },
                         child: Text(
                           'Quên mật khẩu?',
@@ -209,10 +217,20 @@ class _LoginPageState extends State<LoginPage> {
             const SnackBar(
               content: Text("Đăng nhập thành công!"),
               backgroundColor: Colors.green,
-
             ),
           );
-          Navigator.pop(context); // 🔙 quay về trang trước
+
+          // ✅ Kiểm tra đến từ đâu
+          if (widget.fromDetail) {
+            Navigator.pop(context); // 🔙 nếu đến từ trang chi tiết thì quay lại
+          } else {
+            // 🚀 nếu không, chuyển sang HomePage
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => const HomePage()),
+                  (route) => false,
+            );
+          }
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text("Không nhận được token từ server")),
@@ -225,4 +243,5 @@ class _LoginPageState extends State<LoginPage> {
       }
     }
   }
+
 }

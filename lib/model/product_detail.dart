@@ -7,7 +7,7 @@ class ProductDetail {
   final String description;
   final String slug;
   final String thumbnail;
-  final Promotion? promotion;
+  final List<Promotion> promotions;
   final bool available;
   final List<Variant> variants;
   final List<Media> medias;
@@ -20,7 +20,7 @@ class ProductDetail {
     required this.description,
     required this.slug,
     required this.thumbnail,
-    this.promotion,
+    required this.promotions,
     required this.available,
     required this.variants,
     required this.medias,
@@ -35,7 +35,10 @@ class ProductDetail {
       description: json["description"] ?? "",
       slug: json["slug"],
       thumbnail: json["thumbnail"] ?? "",
-      promotion: json["promotion"] != null ? Promotion.fromJson(json["promotion"]) : null,
+      promotions: (json['promotions'] as List<dynamic>?)
+          ?.map((e) => Promotion.fromJson(e))
+          .toList() ??
+          [],
       available: json["available"] ?? true,
       variants: (json["variants"] as List<dynamic>?)
           ?.map((v) => Variant.fromJson(v))
@@ -47,7 +50,13 @@ class ProductDetail {
           [],
       rating: json["rating"] != null
           ? Rating.fromJson(json["rating"])
-          : Rating(total: 0, average: 0.0),
+          : Rating(total: 0,
+          average: 0.0,
+          star1: 0,
+          star2: 0,
+          star3: 0,
+          star4: 0,
+          star5: 0),
       detail: json["detail"] != null
           ? ProductDetailInfo.fromJson(json["detail"])
           : ProductDetailInfo(displaySize: '', screenTechnology: '', cameraRear: '', cameraFront: '', chipset: '', nfc: '', storage: '', battery: '', sim: '', osVersion: '', displayResolution: '', displayFeatures: '', cpuType: ''), // hoặc tùy bạn có default constructor
@@ -132,3 +141,47 @@ class Media {
     );
   }
 }
+class Rating {
+  final int total;
+  final double average;
+  final int star1;
+  final int star2;
+  final int star3;
+  final int star4;
+  final int star5;
+
+  Rating({
+    required this.total,
+    required this.average,
+    required this.star1,
+    required this.star2,
+    required this.star3,
+    required this.star4,
+    required this.star5,
+  });
+
+  factory Rating.fromJson(Map<String, dynamic> json) {
+    return Rating(
+      total: json['total'] ?? 0,
+      average: (json['average'] as num?)?.toDouble() ?? 0.0,
+      star1: json['star1'] ?? 0,
+      star2: json['star2'] ?? 0,
+      star3: json['star3'] ?? 0,
+      star4: json['star4'] ?? 0,
+      star5: json['star5'] ?? 0,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'total': total,
+      'average': average,
+      'star1': star1,
+      'star2': star2,
+      'star3': star3,
+      'star4': star4,
+      'star5': star5,
+    };
+  }
+}
+

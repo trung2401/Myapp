@@ -41,6 +41,20 @@ class _CartScreenState extends State<CartScreen> {
     }
   }
 
+  void deleteCartItem(int cartId) async {
+    try {
+      final response = await _cartService.deleteCartItem(cartId);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(response ?? "Đã xoá sản phẩm khỏi giỏ")),
+      );
+      loadCart(); // Tải lại giỏ hàng sau khi xoá
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Lỗi khi xoá sản phẩm: $e")),
+      );
+    }
+  }
+
 
 
   void increaseQuantity(CartItem item) async {
@@ -158,6 +172,10 @@ class _CartScreenState extends State<CartScreen> {
                             IconButton(
                               onPressed: () => increaseQuantity(cart),
                               icon: const Icon(Icons.add_circle_outline),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.delete, color: Colors.red),
+                              onPressed: () => deleteCartItem(cart.id),
                             ),
                           ],
                         ),

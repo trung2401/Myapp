@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:myapp/pages/product_search_page.dart';
 
 import '../screens/category_screen.dart';
 import '../screens/home_screen.dart';
@@ -17,6 +18,8 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage>{
   int curentIndex = 0;
+  final TextEditingController _searchController = TextEditingController();
+  
   List screen = [
     HomeScreen(),
     CategoryScreen(),
@@ -39,8 +42,8 @@ class _HomePageState extends State<HomePage>{
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                Colors.redAccent, // xanh đậm
-                Colors.redAccent, // xanh nhạt vừa
+                Colors.redAccent,
+                Colors.redAccent,
               ],
             ),
           ),
@@ -65,13 +68,39 @@ class _HomePageState extends State<HomePage>{
                 borderRadius: BorderRadius.circular(5),
               ),
               child: TextField(
+                controller: _searchController,
+                style: const TextStyle(fontSize: 16),
                 decoration: InputDecoration(
                   hintText: "Bạn muốn mua gì hôm nay?",
                   hintStyle: const TextStyle(color: Colors.grey),
-                  prefixIcon: const Icon(Icons.search, color: Colors.black, size: 25),
-                  border: InputBorder.none,
+                  prefixIcon: IconButton(
+                      icon: const Icon(Icons.search, color: Colors.black, size: 25),
+                      onPressed: () {
+                        // Xử lý sự kiện khi bấm nút tìm kiếm
+                        final keyword = _searchController.text.trim();
+                        if(keyword.isNotEmpty){
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ProductSearchPage(initialKeyword: keyword),
+                            ),
+                          );
+                        }
+                      }),
                   contentPadding: const EdgeInsets.only(top: 5),
+                  border: InputBorder.none,
                 ),
+                // sự kiện tìm kiếm thông qua bàn phím điện thoại khi nhấn enter
+                onSubmitted: (value){
+                  if(value.trim().isNotEmpty) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ProductSearchPage(initialKeyword: value.trim()),
+                      ),
+                    );
+                  }
+                },
               ),
             ),
           ),

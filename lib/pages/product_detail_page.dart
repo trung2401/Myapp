@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:myapp/model/product_detail.dart';
 import 'package:myapp/services/api_product_detail_service.dart';
+import 'package:myapp/widgets/store_card_row.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:myapp/services/api_add_cart_service.dart';
 import 'package:myapp/model/add_cart_response.dart';
 
+import '../services/api_get_favorite_service.dart';
+import '../widgets/rating_summary_widget.dart';
+import '../widgets/review_section.dart';
 import 'login_page.dart';
 
 
@@ -22,6 +26,9 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   late Future<bool> _isLoggedIn;
   int selectedColorIndex = 0;
   int currentSlide = 0;
+  bool isFavorite = false;
+
+
   final String baseUrl = "https://res.cloudinary.com/doy1zwhge/image/upload";
 
   @override
@@ -69,7 +76,8 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
             }
 
             final product = snapshot.data!;
-
+            final variant = product.variants.isNotEmpty ? product.variants.first : null;
+            final selectedVariant = product.variants[selectedColorIndex];
             // 🔹 Slide đầu: ảnh + mô tả nổi bật | Các slide sau: chỉ ảnh variant
             final slides = [
               {
@@ -201,31 +209,117 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                       fontSize: 18, fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 4),
+
+                // 🔹 Giá sản phẩm
+                if (selectedVariant.specialPrice > 0) ...[
+                  Row(
+                    children: [
+                      Text(
+                        "${selectedVariant.specialPrice.toStringAsFixed(0)}₫",
+                        style: const TextStyle(
+                          color: Colors.red,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        "${selectedVariant.price.toStringAsFixed(0)}₫",
+                        style: const TextStyle(
+                          color: Colors.grey,
+                          fontSize: 14,
+                          decoration: TextDecoration.lineThrough,
+                        ),
+                      ),
+                    ],
+                  ),
+                ] else ...[
+                  Text(
+                    "${selectedVariant.price.toStringAsFixed(0)}₫",
+                    style: const TextStyle(
+                      color: Colors.red,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 6),
+
                 Row(
-                  children: const [
-                    Icon(Icons.star, color: Colors.orange, size: 20),
-                    SizedBox(width: 4),
-                    Text("4.9", style: TextStyle(fontWeight: FontWeight.bold)),
-                    SizedBox(width: 10),
-                    Icon(Icons.favorite_border, size: 20, color: Colors.blue),
-                    SizedBox(width: 4),
-                    Text("Yêu thích", style: TextStyle(color: Colors.blue)),
+                  children: [
+                    const Icon(Icons.star, color: Colors.orange, size: 20),
+                    const SizedBox(width: 4),
+                    Text(
+                        product.rating.average.toStringAsFixed(1)
+                        , style: const TextStyle(fontWeight: FontWeight.bold)
+                    ),
+                    const SizedBox(width: 10),
+                    GestureDetector(
+                      onTap: () async {
+                        try {
+                          final prefs = await SharedPreferences.getInstance();
+                          final token = prefs.getString('jwtToken');
+
+                          if (token == null || token.isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text("Vui lòng đăng nhập để yêu thích sản phẩm")),
+                            );
+                            return;
+                          }
+
+                          final product = await _futureProduct;
+
+                          setState(() {
+                            isFavorite = !isFavorite; // toggle ngay trên UI
+                          });
+
+                          // 🔹 Gọi API theo trạng thái mới
+                          if (isFavorite) {
+                            await GetFavoriteService.likeProduct(product.id);
+                          } else {
+                            await GetFavoriteService.unlikeProduct(product.id);
+                          }
+                        } catch (e) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text("Lỗi: $e")),
+                          );
+                        }
+                      },
+                      child: Row(
+                        children: [
+                          Icon(
+                            isFavorite ? Icons.favorite : Icons.favorite_border,
+                            size: 20,
+                            color: Colors.red,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            "Yêu thích",
+                            style: TextStyle(
+                              color: isFavorite ? Colors.red : Colors.blue,
+                              fontWeight: isFavorite ? FontWeight.bold : FontWeight.normal,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+
                   ],
                 ),
                 const SizedBox(height: 10),
 
                 // 🔹 Variants Grid
+                // 🔹 Variants Grid
                 const Text("Màu sắc",
-                    style:
-                    TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 10),
 
                 GridView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: product.variants.length,
-                  gridDelegate:
-                  const SliverGridDelegateWithFixedCrossAxisCount(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
                     mainAxisSpacing: 8,
                     crossAxisSpacing: 8,
@@ -233,51 +327,76 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                   ),
                   itemBuilder: (context, index) {
                     final variant = product.variants[index];
+                    final bool isOutOfStock = variant.availableStock == 0;
+                    final bool isSelected = selectedColorIndex == index;
+
                     return GestureDetector(
-                      onTap: () => setState(() => selectedColorIndex = index),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: selectedColorIndex == index
-                                ? Colors.red
-                                : Colors.grey.shade400,
-                            width: selectedColorIndex == index ? 2 : 1,
-                          ),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        padding: const EdgeInsets.all(5),
-                        child: Row(
-                          children: [
-                            if (variant.thumbnail.isNotEmpty)
-                              Image.network(
-                                "$baseUrl${variant.thumbnail}",
-                                width: 40,
-                                height: 40,
-                                fit: BoxFit.cover,
-                              ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  for (var attr in variant.attributes)
-                                    Text(
-                                      "${attr.value}",
-                                      style: const TextStyle(
-                                          fontSize: 14, color: Colors.black, fontWeight: FontWeight.w500),
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                ],
-                              ),
+                      onTap: isOutOfStock
+                          ? null // ❌ Không cho chọn nếu hết hàng
+                          : () {
+                        setState(() {
+                          selectedColorIndex = index;
+                        });
+                      },
+                      child: Opacity(
+                        opacity: isOutOfStock ? 0.4 : 1.0, // 🔹 Làm mờ nếu hết hàng
+                        child: Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: isSelected ? Colors.red : Colors.grey.shade400,
+                              width: isSelected ? 2 : 1,
                             ),
-                          ],
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          padding: const EdgeInsets.all(5),
+                          child: Row(
+                            children: [
+                              if (variant.thumbnail.isNotEmpty)
+                                Image.network(
+                                  "$baseUrl${variant.thumbnail}",
+                                  width: 40,
+                                  height: 40,
+                                  fit: BoxFit.cover,
+                                ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    for (var attr in variant.attributes)
+                                      Text(
+                                        "${attr.value}",
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    // // 🔹 Hiển thị giá mỗi variant
+                                    // Text(
+                                    //   "${variant.specialPrice > 0 ? variant.specialPrice : variant.price}₫",
+                                    //   style: TextStyle(
+                                    //     color: isOutOfStock ? Colors.grey : Colors.red,
+                                    //     fontWeight: FontWeight.bold,
+                                    //     fontSize: 13,
+                                    //   ),
+                                    // ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     );
                   },
                 ),
 
+                const SizedBox(height: 20),
+                StoreCardRow(),
                 const SizedBox(height: 20),
 
                 // 🔹 Thông số kỹ thuật
@@ -292,6 +411,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(color: Colors.grey.shade300),
+                    color: Colors.white,
                   ),
                   child: Column(
                     children: [
@@ -314,6 +434,25 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                     ],
                   ),
                 ),
+                const SizedBox(height: 20),
+                // 🔹 Phần hiển thị đánh giá tổng quan (4.9/5)
+                const Text(
+                  "Đánh giá sản phẩm",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 10),
+                RatingSummaryWidget(rating: product.rating),
+                const SizedBox(height: 20),
+
+                // 🔹 Phần Đánh giá sản phẩm
+                const Text(
+                  "Lọc đánh giá theo",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 10),
+
+                ReviewSection(productId: product.id),
+
               ],
             );
           },
@@ -342,7 +481,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                       // Nếu chưa đăng nhập, chuyển sang LoginPage
                       final result = await Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => LoginPage()),
+                        MaterialPageRoute(builder: (_) => LoginPage(fromDetail: true)),
                       );
 
                       // Nếu đăng nhập thành công → đọc lại token

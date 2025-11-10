@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../pages/edit_profile_page.dart';
+import '../pages/favourite_product_page.dart';
 import '../pages/list_address_page.dart';
 import '../pages/login_page.dart';
+import '../pages/order_list_page.dart';
 import '../services/api_get_profile_service.dart';
+import '../services/login_api_service.dart'; // ✅ thêm import này
 import '../model/user_profile.dart';
 import '../widgets/profile_menu_item.dart';
 
@@ -18,6 +21,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool isLoading = true;
   UserProfile? user;
   final String baseUrl = "https://res.cloudinary.com/doy1zwhge/image/upload";
+
   @override
   void initState() {
     super.initState();
@@ -30,7 +34,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       final token = prefs.getString('jwtToken');
 
       if (token == null) {
-        // nếu chưa đăng nhập, chuyển về login
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (_) => LoginPage()),
         );
@@ -53,9 +56,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _logout(BuildContext context) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('jwtToken');
-    await prefs.remove('refreshToken');
+    final loginApi = LoginApiService();
+    await loginApi.clearTokens(); // ✅ Gọi hàm clearTokens()
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Đăng xuất thành công!')),
@@ -83,15 +85,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 backgroundImage: user?.avatar != null && user!.avatar!.isNotEmpty
                     ? NetworkImage(
                   user!.avatar!.startsWith('http')
-                      ? user!.avatar! // đã là URL đầy đủ
-                      : "$baseUrl${user!.avatar!}", // là path thì ghép baseUrl
+                      ? user!.avatar!
+                      : "$baseUrl${user!.avatar!}",
                 )
                     : const AssetImage('assets/logo/user.jpg') as ImageProvider,
-                onBackgroundImageError: (_, __) {
-                  // Nếu ảnh lỗi thì không crash
-                },
               ),
-
               const SizedBox(height: 12),
               Text(
                 user?.name ?? 'Không có tên',
@@ -124,7 +122,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       });
                     }
                   });
-
                 },
               ),
               ProfileMenuItem(
@@ -135,37 +132,47 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => ListAddressPage(),
+                        builder: (context) => const ListAddressPage(),
                       ),
                     );
                   }
                 },
               ),
               ProfileMenuItem(
-                icon: Icons.edit_location_alt_outlined,
-                text: 'Thêm địa chỉ',
+                icon: Icons.favorite_border_outlined,
+                text: 'Sản phẩm yêu thích',
                 onTap: () {
-
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const FavouriteProductPage(),
+                    ),
+                  );
                 },
               ),
               ProfileMenuItem(
                 icon: Icons.shopping_bag_outlined,
                 text: 'Đơn hàng của tôi',
-                onTap: () {},
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const OrderListPage(),
+                    ),
+                  );
+                },
               ),
-
 
               const SizedBox(height: 10),
 
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: ElevatedButton.icon(
-                  onPressed: () => _logout(context),
+                  onPressed: () => _logout(context), // ✅ Gọi hàm mới
                   icon: const Icon(Icons.logout),
                   label: const Text(
                     'Đăng xuất',
-                    style: TextStyle(
-                        fontSize: 16, fontWeight: FontWeight.w600),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.redAccent,
