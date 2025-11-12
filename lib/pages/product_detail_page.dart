@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:myapp/services/api_add_cart_service.dart';
 import 'package:myapp/model/add_cart_response.dart';
 
+import '../screens/cart_screen.dart';
 import '../services/api_get_favorite_service.dart';
 import '../widgets/rating_summary_widget.dart';
 import '../widgets/review_section.dart';
@@ -529,15 +530,66 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
             const SizedBox(width: 10),
             Expanded(
               child: ElevatedButton(
-                onPressed: () {},
+                // Thay onPressed của "Mua ngay"
+                onPressed: () async {
+                  try {
+                    final prefs = await SharedPreferences.getInstance();
+                    var token = prefs.getString('jwtToken');
+
+                    if (token == null || token.isEmpty) {
+                      final result = await Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => LoginPage(fromDetail: true)),
+                      );
+                      if (result == true) {
+                        final prefsAfterLogin = await SharedPreferences.getInstance();
+                        token = prefsAfterLogin.getString('jwtToken');
+                      } else {
+                        return;
+                      }
+                    }
+
+                    if (token != null && token.isNotEmpty) {
+                      final product = await _futureProduct;
+                      final selectedVariant = product.variants[selectedColorIndex];
+
+                      // Thêm sản phẩm vào giỏ hàng
+                      final api = AddCartApiService();
+                      final result = await api.addToCart(selectedVariant.id, 1);
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(result.message.isNotEmpty
+                              ? result.message
+                              : "Thêm sản phẩm thành công!"),
+                        ),
+                      );
+
+                      // 🔹 Chuyển sang CartScreen, truyền ID sản phẩm vừa thêm
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => CartScreen(
+                            highlightCartItemId: selectedVariant.id,
+                          ),
+                        ),
+                      );
+                    }
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text("Lỗi khi thêm giỏ hàng: $e")),
+                    );
+                  }
+                },
+
                 style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
                 child: const Text(
                   "Mua ngay",
-                  style:
-                  TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                 ),
               ),
             ),
+
           ],
         ),
       ),
