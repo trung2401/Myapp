@@ -156,4 +156,42 @@ class LoginApiService {
     }
   }
 
+  // ==========================
+// 📝 REGISTER USER
+// ==========================
+  Future<Map<String, dynamic>> register({
+    required String name,
+    required String email,
+    required String password,
+    required String phone,
+  }) async {
+    final url = Uri.parse("$baseUrl/api/public/auth/register");
+    print("🔸 Gửi đăng ký tới: $url");
+
+    final body = {
+      "name": name,
+      "email": email,
+      "password": password,
+      "phone": phone,
+    };
+
+    print("📤 Body gửi đi: $body");
+
+    final response = await http.post(
+      url,
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode(body),
+    );
+
+    print("📥 Response: ${response.body}");
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception("Lỗi đăng ký: ${response.body}");
+    }
+  }
+
+
+
 }

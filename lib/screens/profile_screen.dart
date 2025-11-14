@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../pages/change_password_page.dart';
 import '../pages/edit_profile_page.dart';
 import '../pages/favourite_product_page.dart';
 import '../pages/list_address_page.dart';
@@ -161,6 +162,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                   );
                 },
+              ),
+              ProfileMenuItem(
+                icon: Icons.change_circle_outlined,
+                text: 'Đổi mật khẩu',
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ChangePasswordPage(),
+                    ),
+                  );
+                }
               ),
 
               const SizedBox(height: 10),

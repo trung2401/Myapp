@@ -17,6 +17,9 @@ class PaymentQrScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     // 👉 Giả sử API trả về paymentInfo chứa link hoặc text QR
     final qrData = paymentInfo['qrData'] ?? 'Không có dữ liệu QR';
+    print("🔍 QR DATA từ API:");
+    print(paymentInfo['qrData']);
+    print(paymentInfo);
 
     return Scaffold(
       appBar: AppBar(
