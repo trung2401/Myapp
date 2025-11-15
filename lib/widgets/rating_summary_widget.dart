@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:myapp/model/product_detail.dart';
+import 'package:myapp/widgets/review_buttom_sheet.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../pages/login_page.dart';
 
 class RatingSummaryWidget extends StatelessWidget {
-  final Rating rating;
+  final ProductDetail product;
 
-  const RatingSummaryWidget({super.key, required this.rating});
+  const RatingSummaryWidget({super.key, required this.product});
 
   @override
   Widget build(BuildContext context) {
-    final total = rating.total == 0 ? 1 : rating.total; // tránh chia 0
+    final total = product.rating.total == 0 ? 1 : product.rating.total; // tránh chia 0
 
     Widget _buildRatingBar(int stars, int count) {
       final percent = count / total;
@@ -62,7 +66,7 @@ class RatingSummaryWidget extends StatelessWidget {
               Row(
                 children: [
                   Text(
-                    rating.average.toStringAsFixed(1),
+                    product.rating.average.toStringAsFixed(1),
                     style: const TextStyle(
                       fontSize: 30,
                       fontWeight: FontWeight.bold,
@@ -84,11 +88,50 @@ class RatingSummaryWidget extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Tính năng viết đánh giá đang được phát triển.")),
-                  );
+                onPressed: () async {
+                  try{
+                    final prefs = await SharedPreferences.getInstance();
+                    var token = prefs.getString('jwtToken');
+
+                    if (token == null || token.isEmpty) {
+                      // Nếu chưa đăng nhập, chuyển sang LoginPage
+                      final result = await Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => LoginPage(fromDetail: true)),
+                      );
+
+                      // Nếu đăng nhập thành công → đọc lại token
+                      if (result == true) {
+                        final prefsAfterLogin = await SharedPreferences.getInstance();
+                        token = prefsAfterLogin.getString('jwtToken');
+                      } else {
+                        return; // Nếu thoát ra thì không làm gì
+                      }
+                    }
+                    if (token != null && token.isNotEmpty) {
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        backgroundColor: Colors.white,
+                        shape: const RoundedRectangleBorder(
+                          borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                        ),
+                        builder: (context) => ReviewBottomSheet(productId: product.id),
+                      );
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text("Không thể xác thực người dùng")),
+                      );
+                    }
+
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text("Lỗi khi thêm giỏ hàng: $e")),
+                    );
+                  }
+
                 },
+
                 child: const Text("Viết đánh giá",
                     style: TextStyle(color: Colors.white)),
               ),
@@ -97,21 +140,21 @@ class RatingSummaryWidget extends StatelessWidget {
 
           const SizedBox(height: 4),
           Text(
-            "${rating.total} lượt đánh giá",
+            "${product.rating.total} lượt đánh giá",
             style: const TextStyle(color: Colors.black54),
           ),
           const SizedBox(height: 10),
 
           // Thanh sao
-          _buildRatingBar(5, rating.star5),
+          _buildRatingBar(5, product.rating.star5),
           const SizedBox(height: 4),
-          _buildRatingBar(4, rating.star4),
+          _buildRatingBar(4, product.rating.star4),
           const SizedBox(height: 4),
-          _buildRatingBar(3, rating.star3),
+          _buildRatingBar(3, product.rating.star3),
           const SizedBox(height: 4),
-          _buildRatingBar(2, rating.star2),
+          _buildRatingBar(2, product.rating.star2),
           const SizedBox(height: 4),
-          _buildRatingBar(1, rating.star1),
+          _buildRatingBar(1, product.rating.star1),
         ],
       ),
     );

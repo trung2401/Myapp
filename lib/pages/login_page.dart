@@ -25,7 +25,7 @@ class _LoginPageState extends State<LoginPage> {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.black,
+        backgroundColor: Colors.redAccent,
         elevation: 0,
         leading: IconButton(
           onPressed: () {
@@ -34,7 +34,7 @@ class _LoginPageState extends State<LoginPage> {
           icon: const Icon(Icons.arrow_back, color: Colors.white),
         ),
         title: const Text(
-          'Cellphones',
+          'Đăng nhập',
           style: TextStyle(
               color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold),
         ),
@@ -45,7 +45,7 @@ class _LoginPageState extends State<LoginPage> {
           height: size.height,
           width: size.width,
           padding:
-          const EdgeInsets.only(left: 20, right: 20, top: 80, bottom: 50),
+          const EdgeInsets.only(left: 20, right: 20, top: 50, bottom: 50),
           color: Colors.white,
           child: Form(
             key: _formKey,
@@ -53,9 +53,9 @@ class _LoginPageState extends State<LoginPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  'Hello, \nWelcome Back',
+                  'Xin chào, \nVui lòng đăng nhập',
                   style: TextStyle(
-                      color: Colors.black,
+                      color: Colors.redAccent,
                       fontSize: 40,
                       fontWeight: FontWeight.bold),
                 ),
@@ -69,7 +69,7 @@ class _LoginPageState extends State<LoginPage> {
                         const Image(
                             width: 100,
                             image: AssetImage(
-                                'assets/images_phone/logologin.png')),
+                                'assets/logo/login.png')),
                       ],
                     ),
                     const SizedBox(height: 40),
@@ -152,7 +152,7 @@ class _LoginPageState extends State<LoginPage> {
                         },
                         child: Text(
                           'Quên mật khẩu?',
-                          style: TextStyle(color: Colors.black, fontSize: 20),
+                          style: TextStyle(color: Colors.redAccent, fontSize: 20),
                         )
                     ),
 
@@ -164,7 +164,7 @@ class _LoginPageState extends State<LoginPage> {
                       height: 50,
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.black,
+                            backgroundColor: Colors.redAccent,
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(20))),
                         onPressed: _onLoginPressed,
@@ -182,7 +182,7 @@ class _LoginPageState extends State<LoginPage> {
                   children: [
                     const Text(
                       'Bạn chưa có tài khoản? ',
-                      style: TextStyle(color: Colors.black, fontSize: 18),
+                      style: TextStyle(color: Colors.grey, fontSize: 18),
                     ),
                     TextButton(
                       onPressed: () {
@@ -190,7 +190,7 @@ class _LoginPageState extends State<LoginPage> {
                       },
                       child: const Text(
                         'Đăng ký ngay',
-                        style: TextStyle(color: Colors.black, fontSize: 18),
+                        style: TextStyle(color: Colors.redAccent, fontSize: 18),
                       ),
                     )
                   ],

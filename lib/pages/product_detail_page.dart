@@ -442,7 +442,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 10),
-                RatingSummaryWidget(rating: product.rating),
+                RatingSummaryWidget(product: product),
                 const SizedBox(height: 20),
 
                 // 🔹 Phần Đánh giá sản phẩm

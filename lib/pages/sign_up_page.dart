@@ -21,14 +21,14 @@ class _SignInPageState extends State<SignUpPage> {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.black,
+        backgroundColor: Colors.redAccent,
         elevation: 0,
         leading: IconButton(
           onPressed: () => Navigator.pop(context),
           icon: const Icon(Icons.arrow_back, color: Colors.white),
         ),
         title: const Text(
-          'Cellphones',
+          'Đăng ký',
           style: TextStyle(
             color: Colors.white,
             fontSize: 28,
@@ -41,17 +41,17 @@ class _SignInPageState extends State<SignUpPage> {
         child: Container(
           // height: size.height,
           width: size.width,
-          padding: const EdgeInsets.only(left: 20, right: 20, top: 50, bottom: 50),
+          padding: const EdgeInsets.only(left: 20, right: 20, top: 40, bottom: 50),
           color: Colors.white,
           child: Form(
             key: _formKey,
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 const Text(
-                  'Hello, \nAre You Ready?',
+                  'Bạn đã sẵn sàng?',
                   style: TextStyle(
-                    color: Colors.black,
+                    color: Colors.redAccent,
                     fontSize: 40,
                     fontWeight: FontWeight.bold,
                   ),
@@ -64,7 +64,7 @@ class _SignInPageState extends State<SignUpPage> {
                     SizedBox(width: 130),
                     Image(
                       width: 100,
-                      image: AssetImage('assets/images_phone/logologin.png'),
+                      image: AssetImage('assets/logo/login.png'),
                     ),
                   ],
                 ),
@@ -201,8 +201,6 @@ class _SignInPageState extends State<SignUpPage> {
                 //   },
                 // ),
 
-                const SizedBox(height: 20),
-
                 /// MẬT KHẨU
                 TextFormField(
                   controller: _passwordController,
@@ -277,7 +275,7 @@ class _SignInPageState extends State<SignUpPage> {
                   height: 50,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.black,
+                      backgroundColor: Colors.redAccent,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20),
                       ),
@@ -297,7 +295,7 @@ class _SignInPageState extends State<SignUpPage> {
                   children: [
                     const Text(
                       'Bạn đã có tài khoản? ',
-                      style: TextStyle(color: Colors.black, fontSize: 18),
+                      style: TextStyle(color: Colors.grey, fontSize: 18),
                     ),
                     TextButton(
                       onPressed: () {
@@ -306,7 +304,7 @@ class _SignInPageState extends State<SignUpPage> {
                       },
                       child: const Text(
                         'Đăng nhập ngay',
-                        style: TextStyle(color: Colors.black, fontSize: 18),
+                        style: TextStyle(color: Colors.redAccent, fontSize: 18),
                       ),
                     )
                   ],
