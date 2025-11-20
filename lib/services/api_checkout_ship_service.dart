@@ -12,7 +12,7 @@ class ApiCheckoutShipService {
     required String fullName,
     required String phone,
     required String email,
-    required String paymentMethod, // "qr" hoặc "cod"
+    required String paymentMethod, // "BANK" hoặc "COD"
     required String line,
     required String ward,
     required String district,

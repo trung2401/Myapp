@@ -13,6 +13,7 @@ class ProductDetail {
   final List<Media> medias;
   final Rating rating;
   final ProductDetailInfo detail;
+  final List<Sibling> siblings; // <-- thêm vào đây
 
   ProductDetail({
     required this.id,
@@ -26,6 +27,7 @@ class ProductDetail {
     required this.medias,
     required this.rating,
     required this.detail,
+    required this.siblings, // <-- thêm vào constructor
   });
 
   factory ProductDetail.fromJson(Map<String, dynamic> json) {
@@ -60,6 +62,10 @@ class ProductDetail {
       detail: json["detail"] != null
           ? ProductDetailInfo.fromJson(json["detail"])
           : ProductDetailInfo(displaySize: '', screenTechnology: '', cameraRear: '', cameraFront: '', chipset: '', nfc: '', storage: '', battery: '', sim: '', osVersion: '', displayResolution: '', displayFeatures: '', cpuType: ''), // hoặc tùy bạn có default constructor
+      siblings: (json["siblings"] as List<dynamic>?)
+          ?.map((s) => Sibling.fromJson(s))
+          .toList() ??
+          [], // <-- parse siblings từ JSON
     );
   }
 }
@@ -181,6 +187,41 @@ class Rating {
       'star3': star3,
       'star4': star4,
       'star5': star5,
+    };
+  }
+}
+class Sibling {
+  final int id;
+  final String name;
+  final String slug;
+  final String relatedName;
+  final String thumbnail;
+
+  Sibling({
+    required this.id,
+    required this.name,
+    required this.slug,
+    required this.relatedName,
+    required this.thumbnail,
+  });
+
+  factory Sibling.fromJson(Map<String, dynamic> json) {
+    return Sibling(
+      id: json["id"],
+      name: json["name"] ?? "",
+      slug: json["slug"] ?? "",
+      relatedName: json["related_name"] ?? "",
+      thumbnail: json["thumbnail"] ?? "",
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'slug': slug,
+      'related_name': relatedName,
+      'thumbnail': thumbnail,
     };
   }
 }

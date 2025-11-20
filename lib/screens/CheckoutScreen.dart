@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../model/cart.dart';
 import '../model/store.dart';
 import '../model/user_profile.dart';
+import '../pages/home_page.dart';
 import '../services/api_checkout_pickup_service.dart';
 import '../services/api_checkout_ship_service.dart';
 import '../services/api_get_profile_service.dart';
@@ -27,6 +28,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   UserAddress? defaultAddress;
   bool isLoadingProfile = false;
   final String baseUrl = "https://res.cloudinary.com/doy1zwhge/image/upload";
+  String paymentMethod = "COD"; // mặc định COD
+
 
   @override
   void initState() {
@@ -161,6 +164,80 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       ),
                     ],
                   ),
+                  const SizedBox(height: 20),
+                  const Text(
+                    "Phương thức thanh toán",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 12),
+
+                  GestureDetector(
+                    onTap: () {
+                      setState(() => paymentMethod = "COD");
+                    },
+                    child: Container(
+                      padding: EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: paymentMethod == "COD" ? Colors.redAccent : Colors.grey.shade300,
+                          width: paymentMethod == "COD" ? 2 : 1,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              "Thanh toán khi nhận hàng",
+                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                            ),
+                          ),
+                          Icon(
+                            paymentMethod == "COD"
+                                ? Icons.radio_button_checked
+                                : Icons.radio_button_off,
+                            color: paymentMethod == "COD" ? Colors.redAccent : Colors.grey,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  SizedBox(height: 12),
+                  // Phương thức thanh toán
+                  GestureDetector(
+                    onTap: () {
+                      setState(() => paymentMethod = "BANK");
+                    },
+                    child: Container(
+                      padding: EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: paymentMethod == "BANK" ? Colors.redAccent : Colors.grey.shade300,
+                          width: paymentMethod == "BANK" ? 2 : 1,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              "Chuyển khoản ngân hàng qua mã QR",
+                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                            ),
+                          ),
+                          Icon(
+                            paymentMethod == "BANK"
+                                ? Icons.radio_button_checked
+                                : Icons.radio_button_off,
+                            color: paymentMethod == "BANK" ? Colors.redAccent : Colors.grey,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
 
                   const SizedBox(height: 10),
 
@@ -211,11 +288,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              "Họ và tên: ${userProfile?.name ?? ''}",
+                              "Họ và tên:\n ${userProfile?.name ?? ''}",
                               style: const TextStyle(fontSize: 16,),
                             ),
                             Text(
-                              "Số điện thoại: ${userProfile?.phone ?? ''}",
+                              "Số điện thoại:\n ${userProfile?.phone ?? ''}",
                               style: const TextStyle(fontSize: 16),
                             ),
                           ],
@@ -344,6 +421,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         "quantity": e.quantity,
                       }).toList();
 
+                      Map<String, dynamic> data;
+
                       if (isPickup) {
                         // Kiểm tra cửa hàng
                         if (selectedStore == null) {
@@ -353,29 +432,19 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           return;
                         }
 
-                        // Nhận tại cửa hàng
+                        // Tạo đơn hàng nhận tại cửa hàng
                         final result = await ApiCheckoutPickupService.createPickupOrder(
                           orderItems: orderItems,
                           fullName: userProfile?.name ?? "",
                           phone: userProfile?.phone ?? "",
                           email: userProfile?.email ?? "",
-                          paymentMethod: "cod", // hoặc "cod"
+                          paymentMethod: paymentMethod,
                           storeId: selectedStore!.id,
                         );
 
-                        final data = result['data'];
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => PaymentQrScreen(
-                              orderId: data['orderId'].toString(),
-                              amount: (data['amount'] ?? 0) * 1.0,
-                              paymentInfo: data['paymentInfo'] ?? {},
-                            ),
-                          ),
-                        );
+                        data = result['data'];
                       } else {
-                        // Kiểm tra địa chỉ
+                        // Kiểm tra địa chỉ giao hàng
                         if (defaultAddress == null) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(content: Text("Vui lòng chọn địa chỉ giao hàng")),
@@ -383,29 +452,42 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           return;
                         }
 
-                        // Giao hàng tận nơi
+                        // Tạo đơn hàng giao hàng tận nơi
                         final result = await ApiCheckoutShipService.createShipOrder(
                           orderItems: orderItems,
                           fullName: userProfile?.name ?? "",
                           phone: userProfile?.phone ?? "",
                           email: userProfile?.email ?? "",
-                          paymentMethod: "cod", // hoặc "cod"
+                          paymentMethod: paymentMethod,
                           line: defaultAddress?.line ?? "",
                           ward: defaultAddress?.ward ?? "",
                           district: defaultAddress?.district ?? "",
                           province: defaultAddress?.province ?? "",
                         );
 
-                        final data = result['data'];
+                        data = result['data'];
+                      }
+
+                      // Chuyển hướng dựa trên phương thức thanh toán
+                      if (paymentMethod == "BANK") {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (_) => PaymentQrScreen(
                               orderId: data['orderId'].toString(),
-                              amount: (data['amount'] ?? 0) * 1.0,
+                              amount: (data['totalAmount'] ?? 0) * 1.0,
                               paymentInfo: data['paymentInfo'] ?? {},
                             ),
                           ),
+                        );
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text("Đặt hàng thành công! Thanh toán khi nhận hàng.")),
+                        );
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(builder: (context) => const HomePage()),
+                              (route) => false,
                         );
                       }
                     } catch (e) {
@@ -415,6 +497,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       print("Lỗi khi tạo đơn hàng: $e");
                     }
                   },
+
 
 
                   child: const Text(

@@ -30,7 +30,7 @@ class _HomePageState extends State<HomePage>{
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Image.asset('assets/logo/branch.jpg', width: 200, height: 200),
+        title: Text('MT SMART',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 30),),
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(
             bottom: Radius.circular(15), // 👈 bo cong cạnh dưới

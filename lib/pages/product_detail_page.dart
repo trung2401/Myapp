@@ -309,6 +309,66 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                   ],
                 ),
                 const SizedBox(height: 10),
+                // 🔹 SIBLINGS GRID
+                if (product.siblings.isNotEmpty) ...[
+                  const Text(
+                    "Sản phẩm liên quan",
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 10),
+                  GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: product.siblings.length,
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      mainAxisSpacing: 8,
+                      crossAxisSpacing: 8,
+                      childAspectRatio: 3.8,
+                    ),
+                    itemBuilder: (context, index) {
+                      final sibling = product.siblings[index];
+                      return GestureDetector(
+                        onTap: () {
+                          // Chuyển sang ProductDetailPage mới khi chọn sibling
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => ProductDetailPage(productSlug: sibling.slug),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey.shade300),
+                            borderRadius: BorderRadius.circular(12),
+                            color: Colors.white,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              const SizedBox(height: 1.5),
+
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 4),
+                                child: Text(
+                                  sibling.name,
+                                  style: const TextStyle(
+                                      fontSize: 14, fontWeight: FontWeight.w500),
+                                  textAlign: TextAlign.center,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                ],
 
                 // 🔹 Variants Grid
                 // 🔹 Variants Grid
@@ -401,10 +461,10 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                 const SizedBox(height: 20),
 
                 // 🔹 Thông số kỹ thuật
+                // 🔹 Thông số kỹ thuật
                 const Text(
                   "Thông số kỹ thuật",
-                  style:
-                  TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 10),
 
@@ -416,25 +476,34 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                   ),
                   child: Column(
                     children: [
-                      _buildSpecRow(
-                          "Kích thước màn hình", product.detail.displaySize),
-                      _buildSpecRow("Công nghệ màn hình",
-                          product.detail.screenTechnology),
-                      _buildSpecRow("Camera sau", product.detail.cameraRear),
-                      _buildSpecRow("Camera trước", product.detail.cameraFront),
-                      _buildSpecRow("Chipset", product.detail.chipset),
-                      _buildSpecRow("Công nghệ NFC", product.detail.nfc),
-                      _buildSpecRow("Bộ nhớ trong", product.detail.storage),
-                      _buildSpecRow("Thẻ SIM", product.detail.sim),
-                      _buildSpecRow("Hệ điều hành", product.detail.osVersion),
-                      _buildSpecRow("Độ phân giải màn hình",
-                          product.detail.displayResolution),
-                      _buildSpecRow(
-                          "Tính năng màn hình", product.detail.displayFeatures),
-                      _buildSpecRow("Loại CPU", product.detail.cpuType),
+                      if (product.detail.displaySize.isNotEmpty)
+                        _buildSpecRow("Kích thước màn hình", product.detail.displaySize),
+                      if (product.detail.screenTechnology.isNotEmpty)
+                        _buildSpecRow("Công nghệ màn hình", product.detail.screenTechnology),
+                      if (product.detail.cameraRear.isNotEmpty)
+                        _buildSpecRow("Camera sau", product.detail.cameraRear),
+                      if (product.detail.cameraFront.isNotEmpty)
+                        _buildSpecRow("Camera trước", product.detail.cameraFront),
+                      if (product.detail.chipset.isNotEmpty)
+                        _buildSpecRow("Chipset", product.detail.chipset),
+                      if (product.detail.nfc.isNotEmpty)
+                        _buildSpecRow("Công nghệ NFC", product.detail.nfc),
+                      if (product.detail.storage.isNotEmpty)
+                        _buildSpecRow("Bộ nhớ trong", product.detail.storage),
+                      if (product.detail.sim.isNotEmpty)
+                        _buildSpecRow("Thẻ SIM", product.detail.sim),
+                      if (product.detail.osVersion.isNotEmpty)
+                        _buildSpecRow("Hệ điều hành", product.detail.osVersion),
+                      if (product.detail.displayResolution.isNotEmpty)
+                        _buildSpecRow("Độ phân giải màn hình", product.detail.displayResolution),
+                      if (product.detail.displayFeatures.isNotEmpty)
+                        _buildSpecRow("Tính năng màn hình", product.detail.displayFeatures),
+                      if (product.detail.cpuType.isNotEmpty)
+                        _buildSpecRow("Loại CPU", product.detail.cpuType),
                     ],
                   ),
                 ),
+
                 const SizedBox(height: 20),
                 // 🔹 Phần hiển thị đánh giá tổng quan (4.9/5)
                 const Text(
