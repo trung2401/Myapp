@@ -33,6 +33,17 @@ class _CartScreenState extends State<CartScreen> {
 
   Future<void> loadCart() async {
     try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('jwtToken');
+      if (token == null || token.isEmpty){
+        setState(() {
+          isLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("⚠️ Người dùng chưa đăng nhập")),
+        );
+        return;
+      }
       final response = await _cartService.getCart();
       setState(() {
         cartItems = response.data.reversed.toList();

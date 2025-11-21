@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:myapp/widgets/count_down_time_widget.dart';
+import '../pages/home_page.dart';
+import '../services/payment_socket_service.dart';
 
-class PaymentQrScreen extends StatelessWidget {
+class PaymentQrScreen extends StatefulWidget {
   final String orderId;
   final double amount;
   final Map<String, dynamic> paymentInfo;
@@ -13,13 +16,42 @@ class PaymentQrScreen extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    final qrUrl = paymentInfo['qrCodeUrl'] ?? '';
+  State<PaymentQrScreen> createState() => _PaymentQrScreenState();
+}
 
-    print("🔍 QR URL:");
-    print(qrUrl);
-    print(paymentInfo);
-    print(amount);
+class _PaymentQrScreenState extends State<PaymentQrScreen> {
+  final socketService = PaymentSocketService();
+
+  @override
+  void initState() {
+    super.initState();
+
+    socketService.onPaid = () {
+      socketService.disconnect(); // đóng socket
+
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => const HomePage()),
+            (route) => false,
+      );
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Thanh toán thành công!")),
+      );
+    };
+
+    socketService.connect(widget.orderId); // 🔥 mở socket
+  }
+
+  @override
+  void dispose() {
+    socketService.disconnect(); // đóng socket khi rời màn
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final qrUrl = widget.paymentInfo['qrCodeUrl'] ?? '';
 
     return Scaffold(
       appBar: AppBar(
@@ -40,7 +72,6 @@ class PaymentQrScreen extends StatelessWidget {
 
               const SizedBox(height: 24),
 
-              // 👉 HIỂN THỊ ẢNH QR TỪ SEPAY
               Image.network(
                 qrUrl,
                 width: 220,
@@ -49,41 +80,37 @@ class PaymentQrScreen extends StatelessWidget {
                   return const Text("Không tải được QR");
                 },
               ),
+              const SizedBox(height: 24),
+              Center(
+                child: CountdownTimerWidget(
+                  minutes: 5,
+                  onTimeout: () {
+                    socketService.disconnect();// đóng socket
+                    Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(builder: (_) => const HomePage()),
+                            (route) => false,
+                    );
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("thanh toán bị huỷ vì quá hạn!")),
+                    );
+                  },
+
+                ),
+              ),
 
               const SizedBox(height: 24),
 
-              Text(
-                "Mã đơn hàng: $orderId",
-                style: const TextStyle(fontSize: 16),
-              ),
-
+              Text("Mã đơn hàng: ${widget.orderId}"),
               const SizedBox(height: 8),
-
               Text(
-                "Số tiền cần thanh toán: ${amount.toStringAsFixed(0)}đ",
+                "Số tiền: ${widget.amount.toStringAsFixed(0)}đ",
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: Colors.redAccent,
                 ),
               ),
-
-              // const SizedBox(height: 32),
-              //
-              // ElevatedButton.icon(
-              //   icon: const Icon(Icons.check_circle_outline),
-              //   label: const Text("Xác nhận đã thanh toán"),
-              //   style: ElevatedButton.styleFrom(
-              //     backgroundColor: Colors.green,
-              //     minimumSize: const Size(double.infinity, 50),
-              //   ),
-              //   onPressed: () {
-              //     Navigator.pop(context);
-              //     ScaffoldMessenger.of(context).showSnackBar(
-              //       const SnackBar(content: Text("Đơn hàng của bạn đã được xác nhận!")),
-              //     );
-              //   },
-              // ),
             ],
           ),
         ),
