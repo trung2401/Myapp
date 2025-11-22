@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:myapp/pages/product_search_page.dart';
 
 import '../screens/category_screen.dart';
+import '../screens/chat_screen.dart';
 import '../screens/home_screen.dart';
 import '../screens/cart_screen.dart';
 import '../screens/profile_screen.dart';
@@ -51,9 +52,15 @@ class _HomePageState extends State<HomePage>{
         titleTextStyle: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications, color: Colors.white),
+            icon: const Icon(Icons.chat, color: Colors.white),
             onPressed: () {
-              // Xử lý khi bấm chuông
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => ChatScreen(),
+                ),
+              );
+
             },
           ),
         ],
