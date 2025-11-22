@@ -37,6 +37,7 @@ class _ProductCardState extends State<ProductCard> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.grey.shade400),
           boxShadow: [
             BoxShadow(
               color: Colors.grey.withOpacity(0.3),

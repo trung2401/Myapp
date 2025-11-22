@@ -82,7 +82,7 @@ class _BrandRowWidgetState extends State<BrandRowWidget> {
               padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 4),
               decoration: BoxDecoration(
                 color: Colors.white,
-                border: Border.all(color: Colors.grey.shade300),
+                border: Border.all(color: Colors.grey.shade400),
                 borderRadius: BorderRadius.circular(20),
                 // boxShadow: [
                 //   BoxShadow(

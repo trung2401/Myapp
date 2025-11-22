@@ -155,136 +155,148 @@ class _CartScreenState extends State<CartScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("My Cart"),
+        title: const Text("Giỏ Hàng"),
         centerTitle: true,
+        backgroundColor: Colors.white,
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
-          : Column(
-        children: [
-          Expanded(
-            child: ListView.builder(
-              itemCount: cartItems.length,
-              itemBuilder: (context, index) {
-                final cart = cartItems[index];
-                return Card(
-                  margin: const EdgeInsets.all(10),
-                  child: Padding(
-                    padding: const EdgeInsets.all(10),
-                    child: Row(
-                      children: [
-                        // Thêm Checkbox
-                        Checkbox(
-                          value: selectedItems[cart.id] ?? false,
-                          activeColor: Colors.redAccent,
-                          onChanged: (value) {
-                            setState(() {
-                              selectedItems[cart.id] = value ?? false;
-                            });
-                          },
-                        ),
-                        if (cart.item.thumbnail.isNotEmpty)
-                          Image.network(
-                            "$baseUrl${cart.item.thumbnail}",
-                            height: 60,
-                            width: 60,
-                            errorBuilder: (_, __, ___) =>
-                            const Icon(Icons.image_not_supported),
+          : Container(
+            color: Colors.white,
+            child: Column(
+                    children: [
+            Expanded(
+              child: ListView.builder(
+                itemCount: cartItems.length,
+                itemBuilder: (context, index) {
+                  final cart = cartItems[index];
+                  return Card(
+                    color: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16), // bo góc
+                      side: BorderSide(
+                        color: Colors.grey.shade400,  // màu viền
+                        width: 1,           // độ dày viền
+                      ),
+                    ),
+                    margin: const EdgeInsets.all(10),
+                    child: Padding(
+                      padding: const EdgeInsets.all(10),
+                      child: Row(
+                        children: [
+                          // Thêm Checkbox
+                          Checkbox(
+                            value: selectedItems[cart.id] ?? false,
+                            activeColor: Colors.redAccent,
+                            onChanged: (value) {
+                              setState(() {
+                                selectedItems[cart.id] = value ?? false;
+                              });
+                            },
                           ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                cart.item.sku,
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
+                          if (cart.item.thumbnail.isNotEmpty)
+                            Image.network(
+                              "$baseUrl${cart.item.thumbnail}",
+                              height: 60,
+                              width: 60,
+                              errorBuilder: (_, __, ___) =>
+                              const Icon(Icons.image_not_supported),
+                            ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  cart.item.sku,
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
+                                Text(
+                                  "\$${cart.item.price.toStringAsFixed(2)}",
+                                  style: const TextStyle(color: Colors.grey),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Row(
+                            children: [
+                              IconButton(
+                                onPressed: () => decreaseQuantity(cart),
+                                icon: const Icon(Icons.remove_circle_outline),
                               ),
-                              Text(
-                                "\$${cart.item.price.toStringAsFixed(2)}",
-                                style: const TextStyle(color: Colors.grey),
+                              Text(cart.quantity.toString()),
+                              IconButton(
+                                onPressed: () => increaseQuantity(cart),
+                                icon: const Icon(Icons.add_circle_outline),
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.delete, color: Colors.red),
+                                onPressed: () => deleteCartItem(cart.id),
                               ),
                             ],
                           ),
-                        ),
-                        Row(
-                          children: [
-                            IconButton(
-                              onPressed: () => decreaseQuantity(cart),
-                              icon: const Icon(Icons.remove_circle_outline),
-                            ),
-                            Text(cart.quantity.toString()),
-                            IconButton(
-                              onPressed: () => increaseQuantity(cart),
-                              icon: const Icon(Icons.add_circle_outline),
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.delete, color: Colors.red),
-                              onPressed: () => deleteCartItem(cart.id),
-                            ),
-                          ],
-                        ),
-                      ],
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text("Total",
+                          style: TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold)),
+                      Text("\$${getTotal().toStringAsFixed(2)}",
+                          style: const TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: const Size(double.infinity, 50),
+                      backgroundColor: Colors.orange,
+                    ),
+                    onPressed: () {
+                      final checkoutItems = cartItems
+                          .where((item) => selectedItems[item.id] ?? false)
+                          .toList();
+                      if (checkoutItems.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Vui lòng chọn ít nhất một sản phẩm để thanh toán'),
+                          ),
+                        );
+                      } else {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => CheckoutScreen(checkoutItems: checkoutItems),
+                          ),
+                        );
+                      }
+                    },
+
+                    child: const Text(
+                      "Check Out",
+                      style: TextStyle(color: Colors.white, fontSize: 18),
                     ),
                   ),
-                );
-              },
-            ),
+                ],
+              ),
+            )
+                    ],
+                  ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text("Total",
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold)),
-                    Text("\$${getTotal().toStringAsFixed(2)}",
-                        style: const TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold)),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: const Size(double.infinity, 50),
-                    backgroundColor: Colors.orange,
-                  ),
-                  onPressed: () {
-                    final checkoutItems = cartItems
-                        .where((item) => selectedItems[item.id] ?? false)
-                        .toList();
-                    if (checkoutItems.isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Vui lòng chọn ít nhất một sản phẩm để thanh toán'),
-                        ),
-                      );
-                    } else {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => CheckoutScreen(checkoutItems: checkoutItems),
-                        ),
-                      );
-                    }
-                  },
-
-                  child: const Text(
-                    "Check Out",
-                    style: TextStyle(color: Colors.white, fontSize: 18),
-                  ),
-                ),
-              ],
-            ),
-          )
-        ],
-      ),
     );
   }
 }

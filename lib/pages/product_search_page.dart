@@ -57,7 +57,7 @@ class _ProductSearchPageState extends State<ProductSearchPage> {
     return Scaffold(
       appBar: AppBar(
         title: _buildSearchBar(),
-        backgroundColor: Colors.blue,
+        backgroundColor: Colors.redAccent,
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
